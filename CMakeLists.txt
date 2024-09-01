@@ -5,17 +5,18 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-if (NOT PYTHON_EXECUTABLE)
-  set(PYTHON_EXECUTABLE "python3")
-endif()
-
 # To set -std=c++17 flat to explicitly to comple_commands.json
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Get path for cmake for libtorch
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import torch; print(torch.utils.cmake_prefix_path, end='')" OUTPUT_VARIABLE pytorch_path)
-list(APPEND CMAKE_PREFIX_PATH "${pytorch_path}") # no need?
+#if (NOT PYTHON_EXECUTABLE)
+  #set(PYTHON_EXECUTABLE "python3")
+#endif()
+#execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import torch; print(torch.utils.cmake_prefix_path, end='')" OUTPUT_VARIABLE pytorch_path)
+#list(APPEND CMAKE_PREFIX_PATH "${pytorch_path}") # CXX11 ABI problem
+list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libtorch-cxx11-abi-shared-with-deps-2.4.0+cu124/libtorch/share/cmake/")
+
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -29,13 +30,28 @@ find_package(Eigen3 REQUIRED)
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_executable(libtorch_test
   src/libtorch_test.cpp
 )
 target_link_libraries(libtorch_test "${TORCH_LIBRARIES}")
 
+add_executable(detection
+  src/detection.cpp
+)
+#message(${TORCH_LIBRARIES})
+#message(${OpenCV_LIBS})
+target_link_libraries(detection
+  "${TORCH_LIBRARIES}"
+  "${OpenCV_LIBS}"
+)
+set_property(TARGET detection PROPERTY CXX_STANDARD 17)
+#target_compile_definitions(detection PUBLIC _GLIBCXX_USE_CXX11_ABI=1)
+message("pre cxx:"${_GLIBCXX_USE_CXX11_ABI})
+
 install(
-  TARGETS libtorch_test
+  TARGETS libtorch_test detection
   DESTINATION lib/${PROJECT_NAME}
 )
 
