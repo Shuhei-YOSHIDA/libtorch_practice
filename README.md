@@ -14,10 +14,10 @@ resnet18.pt
 dog.jpg
 imagenet_classes.txt
 1000
-出力の最初の値: -1.00588
+first value of tensor: -1.00588
 [1, 1000]
 2
-上位5のインデックス:[score]:[label] 
+top 5 indexes:[score]:[label]
 258:[14.0042]:[Samoyed]
 261:[10.5235]:[keeshond]
 279:[10.2586]:[Arctic fox]

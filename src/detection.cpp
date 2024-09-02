@@ -1,6 +1,6 @@
 /**
  * @file detection.cpp
- * @note Use pre-learned model
+ * @note Use pre-learned model of resnet18
  */
 
 #include <torch/torch.h>
@@ -10,37 +10,37 @@
 
 torch::Tensor preprocess_image(const cv::Mat& image)
 {
-  // 画像をリサイズ（224x224）
+  // Resize an input image（224x224）
   cv::Mat resized_image;
   cv::resize(image, resized_image, cv::Size(224, 224));
 
-  // BGRからRGBに変換
+  // Convert BGR to RGB
   cv::Mat rgb_image;
   cv::cvtColor(resized_image, rgb_image, cv::COLOR_BGR2RGB);
 
-  // OpenCVのMatをfloat型のテンソルに変換
+  // Convert cv::Mat to Tensor(float)
   torch::Tensor tensor_image = torch::from_blob(rgb_image.data, {1, 224, 224, 3}, torch::kByte);
 
-  // チャンネルの順序を変更 (HWC -> CHW)
+  // Change the order of channels (HWC -> CHW)
   tensor_image = tensor_image.permute({0, 3, 1, 2});
 
-  // 値を[0, 1]にスケーリング
+  // Scale value in between [0, 1]
   tensor_image = tensor_image.to(torch::kFloat) / 255.0;
 
   return tensor_image;
 }
 
-// 上位Kのインデックスを取得する関数
+// To get high-score estimation
 std::vector<int> get_top_k_indices(const torch::Tensor& output, int k)
 {
-  // 出力テンソルの次元を確認
+  // Check shape of output tensor
   if (output.dim() != 2 || output.size(0) != 1)
   {
-    std::cerr << "テンソルの次元が期待と異なります。\n";
+    std::cerr << "Storange for the shape of tensor\n";
     return {};
   }
 
-  // 上位Kのスコアとインデックスを取得
+  // Obtain score and indexes for top K
   auto topk_result = torch::topk(output, k, /*dim=*/1, /*largest=*/true, /*sorted=*/true);
   auto topk_values = std::get<0>(topk_result);
   auto topk_indices = std::get<1>(topk_result);
@@ -54,14 +54,14 @@ std::vector<int> get_top_k_indices(const torch::Tensor& output, int k)
   return indices;
 }
 
-// ラベルのマッピングを読み込む関数
+// Load class label from text file(Use it from pytorch repository)
 std::vector<std::string> load_class_labels(const std::string& file_path)
 {
   std::vector<std::string> labels;
   std::ifstream file(file_path);
   if (!file.is_open())
   {
-    std::cerr << "ラベルファイルを開けませんでした: " << file_path << std::endl;
+    std::cerr << "Couldn't open text file for labels" << file_path << std::endl;
     exit(-1);
   }
 
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
   // Preprocess image and convert it into tensor
   torch::Tensor input_tensor = preprocess_image(image);
 
-  // 推論を実行
+  // Execute inference
   torch::Tensor output_tensor;
   try
   {
@@ -115,20 +115,20 @@ int main(int argc, char **argv)
   }
   catch (const c10::Error& e)
   {
-    std::cerr << "エラー: 推論に失敗しました!" << std::endl;
+    std::cerr << "Error: Failed to infer" << std::endl;
     return -1;
   }
 
-  // 出力を表示（仮に最初の値を表示）
-  std::cout << "出力の最初の値: " << output_tensor[0][0].item<float>() << std::endl;
+  // Show the output tensor information
+  std::cout << "first value of tensor: " << output_tensor[0][0].item<float>() << std::endl;
   std::cout << output_tensor.sizes() << std::endl; // 1000 class in resnet
   std::cout << output_tensor.dim() << std::endl;
   
-  // 上位5のインデックスを取得
+  // Get top 5 indexes
   auto top5_indices = get_top_k_indices(output_tensor, 5);
 
-  // 上位5のインデックスを表示
-  std::cout << "上位5のインデックス:[score]:[label] " << std::endl;
+  // Show top 5 indexes and the correspoing labels
+  std::cout << "top 5 indexes:[score]:[label] " << std::endl;
   for (int index : top5_indices)
   {
     std::cout << index << ":[" << output_tensor[0][index].item<float>() << "]:[" << class_labels[index] << "]" << std::endl;
