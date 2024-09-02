@@ -5,6 +5,7 @@ libtorch_ros_practice
 * Use libtorch for CXX11 ABI not pre-CXX11 ABI
 * libtorch installed with pytorch by pip is pre-CXX11 ABI
 * Download libtorch to your home
+* Set `CMAKE_PREFIX_PATH` to libtorch directory you download in `CMakeLists.txt`.
 
 ```
 $ cd ~/ros2ws/src/libtorch_ros_practice
