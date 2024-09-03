@@ -7,6 +7,8 @@ libtorch_ros_practice
 * Download libtorch to your home
 * Set `CMAKE_PREFIX_PATH` to libtorch directory you download in `CMakeLists.txt`.
 
+
+For test by one image,
 ```
 $ cd ~/ros2ws/src/libtorch_ros_practice
 $ python3 scripts/resnet18_pretrained_torchscript.py
@@ -24,4 +26,11 @@ top 5 indexes:[score]:[label]
 279:[10.2586]:[Arctic fox]
 259:[9.82442]:[Pomeranian]
 283:[9.69924]:[Persian cat]
+```
+
+To start ROS node,
+```
+$ ros2 run usb_cam usb_cam_node_exe # start publishing /image_raw
+$ cd ~/ros2ws/src/libtorch_ros_practice
+$ ros2 run libtorch_ros_practice detection_node resnet18.pt imagenet_classes.txt
 ```

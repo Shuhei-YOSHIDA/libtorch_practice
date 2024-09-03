@@ -24,6 +24,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -40,18 +41,28 @@ target_link_libraries(libtorch_test "${TORCH_LIBRARIES}")
 add_executable(detection
   src/detection.cpp
 )
-#message(${TORCH_LIBRARIES})
-#message(${OpenCV_LIBS})
 target_link_libraries(detection
   "${TORCH_LIBRARIES}"
   "${OpenCV_LIBS}"
 )
 set_property(TARGET detection PROPERTY CXX_STANDARD 17)
-#target_compile_definitions(detection PUBLIC _GLIBCXX_USE_CXX11_ABI=1)
-message("pre cxx:"${_GLIBCXX_USE_CXX11_ABI})
+
+add_executable(detection_node
+  src/detection_node.cpp
+)
+ament_target_dependencies(detection_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  cv_bridge
+)
+target_link_libraries(detection_node
+  "${TORCH_LIBRARIES}"
+  "${OpenCV_LIBS}"
+)
 
 install(
-  TARGETS libtorch_test detection
+  TARGETS libtorch_test detection detection_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
