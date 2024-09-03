@@ -34,3 +34,4 @@ $ ros2 run usb_cam usb_cam_node_exe # start publishing /image_raw
 $ cd ~/ros2ws/src/libtorch_ros_practice
 $ ros2 run libtorch_ros_practice detection_node resnet18.pt imagenet_classes.txt
 ```
+[![example](http://img.youtube.com/vi/n00RjAHWl34/0.jpg)](https://www.youtube.com/watch?v=n00RjAHWl34)
