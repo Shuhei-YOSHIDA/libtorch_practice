@@ -14,8 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
   #set(PYTHON_EXECUTABLE "python3")
 #endif()
 #execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import torch; print(torch.utils.cmake_prefix_path, end='')" OUTPUT_VARIABLE pytorch_path)
-#list(APPEND CMAKE_PREFIX_PATH "${pytorch_path}") # CXX11 ABI problem
-list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libtorch-cxx11-abi-shared-with-deps-2.4.0+cu124/libtorch/share/cmake/")
+#list(APPEND CMAKE_PREFIX_PATH "${pytorch_path}") # Pre-CXX11 ABI problem
+#list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libtorch-cxx11-abi-shared-with-deps-2.4.0+cu124/libtorch/share/cmake/")
+list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/libtorch/share/cmake/")
 
 
 # find dependencies
