@@ -24,6 +24,7 @@ find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -31,6 +32,7 @@ find_package(Eigen3 REQUIRED)
 
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+message("torch lib: "${TORCH_LIBRARY})
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -66,6 +68,40 @@ install(
   TARGETS libtorch_test detection detection_node
   DESTINATION lib/${PROJECT_NAME}
 )
+
+add_library(detection_component SHARED
+  src/detection_component.cpp
+)
+rclcpp_components_register_node(detection_component
+  PLUGIN "DetectionComp"
+  EXECUTABLE detection_component_node
+)
+target_link_libraries(detection_component
+  "${TORCH_LIBRARIES}"
+  "${OpenCV_LIBS}"
+)
+target_include_directories(detection_component
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(detection_component
+  rclcpp
+  rclcpp_components
+  std_msgs
+  sensor_msgs
+  cv_bridge
+)
+ament_export_targets(export_detection_component)
+install(TARGETS
+  detection_component
+  EXPORT export_detection_component
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib
+  INCLUDES DESTINATION include
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

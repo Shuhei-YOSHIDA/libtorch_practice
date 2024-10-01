@@ -29,9 +29,15 @@ top 5 indexes:[score]:[label]
 ```
 
 To start ROS node,
-```
+```bash
 $ ros2 run usb_cam usb_cam_node_exe # start publishing /image_raw
 $ cd ~/ros2ws/src/libtorch_ros_practice
 $ ros2 run libtorch_ros_practice detection_node resnet18.pt imagenet_classes.txt
 ```
 [![example](http://img.youtube.com/vi/n00RjAHWl34/0.jpg)](https://www.youtube.com/watch?v=n00RjAHWl34)
+
+To use ROS components, you need to set environment variable `LD_LIBRARY_PATH`.
+```bash
+$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH${HOME}/libtorch/lib # example
+$ ros2 run libtorhc_ros_practice detection_component_node --ros-args -p model_path:=resnet18.pt label_path:=imagenet_classes.txt
+```
